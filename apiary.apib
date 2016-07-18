@@ -1,0 +1,334 @@
+FORMAT: 1A
+HOST: https://api.shieldq.com
+
+# ShieldQ Inbound API
+
+
+## Overview
+
+The ShieldQ API enables users to manage and retrieve incoming documents . 
+With this API, you can get a list of newly received documents of any type, retrieve, and either archive or delete them.
+
+ShieldQ supports the following document types: inbound faxes, uploaded documents and incoming email messages.
+
+### Intended audience
+This document was created for developers, so that they can integrate inbound documents into their system.
+
+## Programming concepts
+### Typical use
+The most common use would be:
+- **Start a session** 
+- **In a loop:**
+    - Retrieve the new document's metadata. If no items are listed, sleep for a while (e.g., around 60 seconds) and try again.
+    - Process each individual document:
+        - Retrieve document content - see instructions <a href=http://docs.shieldq.apiary.io/#introduction/receiving-and-downloading-documents>here</a>.
+        - Change the document status so that it will not appear in the next list retrieval. The status can be changed to either "Deleted" or "Archived."  
+        Please note: the document can be searched until it is deleted, according to your retention policy).
+- **End the session**
+
+### Service endpoint
+
+<code>https://api.shieldq.com</code>
+
+### Authorization
+To start a session, HTTP Basic authentication is used. 
+A successful operation will return a "Access Token,", which should be used for all other requests. 
+Authentication is done using the HTTP "Authorization" header
+
+#### Basic authentication
+Authorization: Basic <<B>value</B>> <br>
+<B>Value</B> is a Base64-encoded representation of {user:password}. It is used to get the  Access Token. 
+
+
+Example:
+
+<code>Authorization: Basic QWxhZGRpbjpPcGVuU2VzYW1l </code>
+
+Important note: capitalize the "B" in the keyword "Basic," and add a space between Basic and the value.
+
+#### Token authentication
+The Token authentication is returned by a call to <a href=http://docs.shieldq.apiary.io/#reference/0/access-token/get-access-token>"GET Aceess Token"</a>, and is used for authentication in all subsequent requests. 
+The structure of the Authorization HTTP header containing the Token is: Authorization: Bearer <<B>value</B>> <br>
+<B>Value</B> is the Token returned from the "GET Access Token" request. 
+
+
+Example:
+
+<code>Authorization: Bearer hhG776dca44A88a34a</code>
+
+### Response content format
+
+Response containing structured data may be returned in either Json format or XML. 
+
+The default will be "text/json" format. The user can control the response format by adding the HTTP "Accept" header.
+
+To get a Json-formatted response, use:
+
+<code>Accept: text/json</code> <b>Default</b>
+
+<code>Accept: application/json</code>
+
+To get an XML-formatted response, use:
+
+<code>Accept: application/xml</code>
+
+### Document status
+
+A document may have one of the following statuses:
+
+- **New** - Messages in the queue that have not been processed, set as "Archived" or "Deleted". Also, it may be a message that was set as "New".
+
+- **Archived** - Received messages that were archived according to the user retention policy.
+
+- **Deleted** - Deleted messages will be stored up to 7 days, and can be restored (changing the status d to either "Archived" or "New") by referring to a specific document by its ID.
+
+### System limitations
+
+- The maximum number of inbound messages to return in a query is 100.
+
+        100 is the default, and will be used if there is no other definition, or if the value entered is larger than 100.
+- You can query <a href=http://docs.shieldq.apiary.io/#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> up to 6 times a minute.
+- The access token will expire within 15 minutes of last use.
+
+### Date-times format
+Date-times are expected to be <a target="_blank" href="https://en.wikipedia.org/wiki/ISO_8601/">ISO 8601-compliant</a>. 
+See the link for details, but generally speaking, a date-time should look like this:
+
+(date as YYYY-MM-DD)T(time)(GMT offset), for example: 2001-12-31T21:34+02:00
+
+The date-time comprises:
+
+* A date part, like <code>2001-12-31</code>
+* The letter T as a separator
+* A time part, like <code>21:34</code>
+* A GMT time zone offset, like <code>+02:00</code> or <code>-08:00</code>, specifying the time zone for the time part, above. 
+If there is no time zone offset, or if the offset is <code>00:00</code>, the time part provided will be assumed to be in GMT.
+
+### Response Codes
+Common HTTP status codes may be returned, including:
+
+* <code>200 OK</code> - the request was successful.
+* <code>201 Created</code> - The request has been fulfilled and resulted in a new resource being created. 
+* <code>401 Unauthorized</code> - authentication failed or user doesn't have permissions for requested operation.
+* <code>404 Not Found</code> - the requested resource not found.
+* <code>429 Too Many Requests</code> - The user has sent too many requests in a given amount of time. Intended for use with rate limiting schemes.
+* <code>500 Internal Error</code> - The server encountered an unexpected condition which prevented it from fulfilling the request.
+
+## Receiving and downloading documents
+You may receive emails, faxes or uploaded documents.
+When creating a <a href=http://docs.shieldq.apiary.io/#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> request, you will get a list of documents, with the information related.
+
+Note: "BoxedData" within the response refers to specific information per document type: inbound faxes, uploaded documents and incoming email messages.
+
+
+**To obtain the document download URL:**
+- Get a list of the new documents, using a <a href=http://docs.shieldq.apiary.io/#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> request.
+- The response will return the "DownloadUrl" you need. 
+- In order to retrieve the document:
+    - Copy the "DownloadUrl". 
+    - Create a new "GET" request, using the "DownloadUrl" you copied
+    - Use <a href=http://docs.shieldq.apiary.io/#reference/0/access-token/get-access-token>Access Token</a> as the authentication method.
+- The request will automatically download the document.
+
+
+# Group Actions
+List of requests for managing incoming documents.
+
+# Data Structures
+## List
++ Id:789134 (number) - The ID for docuement
++ OwnerUserId: daphna (string) - The document owner’s  user ID
++ OwnerEmailAddress: dddp@pol.cc1 (string) - The owner email address.
++ DocStatus: New (enum) - 
+    + New 
+    + Archived
+    + Deleted    
++ Name: Mydoc (string)- The document reference given by the user (subject)
++ UniqueReference: 1247 (string) - The document refernce given by the user
++ ReceivedTime: `2015-07-01T06:54:46` (string) - Received data date and time, in GMT
++ Type: InboundFax  (enum) - Document type
+    + InboundFax - Received faxes
+    + Upload - Upload documents
+    + InboundEmail - Received by email    
+
++ InboundFax (object) - BoxedData for received faxes 
+    + UserID: ramona (string) - The user ID
+    + DownloadUrl: https://fv.interfax.net/api/normal/image/20185532/1?format=pdf (string) - The URL required for downloading the document. The file format in fax is "pdf"
+    + PhoneNumber: 8006190237 (number) - The receiver’s number
+    + RemoteCSID: qa (string) - The sender CSID 
+    + MessageStatus: 0 (number) - Appendix telephone error
+    + NumberOfPages: 2 (number) - Number of fax pages
+    + CallerID: 65948700 (string) - The sender’s caller ID (Annie)
+    + RecordingDuration: 17 (number) - Transmission time, in seconds
+    
+            
++ Upload (object, optional) - BoxedData for uploaded documents 
+    + UploaderDisplayName (string, optional) - The sender’s name
+    + UploaderConfirmationEmailAddress (string, optional) - The sender’s confirmation email
+    + Files (array, optional)
+        + (object, optional)
+            + Serial (number, optional) - The serial number is "one based", starting the count from one
+            + Name (string, optional) - The filename and file extension
+            + mimeType (string, optional) - Document type. Example: "application/pdf"
+            + Size (number, optional) -Document size,  in bytes
+            + DownloadUrl (string, optional) - The URL required for downloading the document
+                
+                    
++ InboundEmails (object, optional) - BoxedData for inbound email
+    + FromEmailAddress (string, optional) - The sender’s email address
+    + FromDisplayName (string, optional) - The sender’s display name
+    + Subject (string, optional) - The email subject
+    + Size (number, optional) - The size of the raw email message in bytes
+    + BodyDownloadUrl (string, optional) - The URL required for downloading the body of the email
+    + EmailDownloadUrl (string, optional) - The URL required for downloading the email
+    + AttachmentsDescription (array, optional)
+        + (object, optional)
+            + Serial (number, optional) - The serial number is "zero based", starting the count from zero.
+            + Name (string, optional) - The filename and file extension
+            + FileType (string, optional) - Document type. can be: "application/pdf",
+            + Size (number, optional) - Attachment size, in bytes
+            + DownloadUrl (string, optional) - The URL required for downloading the attachment
+            
+
+    
+## Access Token [/accounts/token]
+### Get Access Token [GET]
+The request will generate a token for the user. The token will be used as authorization parameter.
+
++ Request
+
+    + Headers
+    
+            Authorization: Basic [Base64Encoded of {user:password}]
+    
+
++ Response 201 (application/json)
+        
+        "983c97553ad94d7697691cbfdb997d6d"
+       
++ Response 500 (application/json)
+
+        errorMessage: “Internal Server Error”
+       
+        
++ Response 401 (application/json)
+
+        errorMessage: “Unauthorized”
+       
+        
+
+### Delete Access Token [DELETE]
+The request will revoke the token sent in the "Authorization" header.
+
++ Request
+
+    + Headers
+        
+            Authorization: Bearer {value}
+    
+
++ Response 200 
+
++ Response 500 (application/json)
+
+            "errorMessage": “Internal Server Error”
+        
+        
++ Response 401 (application/json)
+
+       
+            errorMessage: “Unauthorized”
+        
+        
+## Incoming Documents [/documents/incoming{?limit}]
+
++ Parameters
+
+    + limit (int,optional) - How many records can be retrieved: limits can range between 1 and 100 items. The default will be 100.
+         + Default: `100`
+    
+    
+### Get New Documents List [GET]
+The request will retrieve a list of documents from last document and backwards, in descending order. The last document is included.<br>
+The retrieved list will include only "New" documents.
+
+Note: "BoxedData" within the response refers to specific information per document type: inbound faxes, uploaded documents and incoming email messages.
+
+
++ Request
+
+    + Headers
+    
+                Authorization: Bearer {value}
+            
++ Response 200 (application/json) 
+
+    + Attributes
+        + List (array[List])
+    
+        
+                 
+
+        
++ Response 429 (application/json)
+
+        
+           "errorMessage": “too many requests for user per minute”
+        
+        
+        
++ Response 500 (application/json)
+
+
+        
+           "errorMessage": “Internal server error”
+       
+        
++ Response 401 (application/json)
+
+       
+            errorMessage: “Unauthorized”
+               
+        
+
+
+
+## Set Document Status [/documents/incoming/{id}?status={status}]
+
++ Parameters
+
+    + id (long,required) - The document ID
+    + status (enum,required) - A collection of choices:
+        + New - restoring a document that has been already archived or deleted. 
+        + Archived - the document will be archived according to the user's retention rules.
+        + Deleted - the document will be deleted. 
+
+### Set Document Status [POST]
+
+The request will update the document status. <br>
+The user can update the status for a document to: 
+* New - restoring a document that has been already archived or deleted.
+* Archived - the document will be stored according to the user's retention policy.
+* Deleted - the document will be deleted. <br> Note that a deleted document is stored for a week from the delete action and can be restored in that time period. 
+
+       
++ Request
+
+    + Headers
+        
+            Authorization: Bearer {value}
+            
++ Response 200 
+
++ Response 401 (application/json)
+
+        
+            errorMessage: “Unauthorized”
+        
+
+
++ Response 500 (application/json)
+
+
+        
+           "errorMessage": “Item status could not be setted”
