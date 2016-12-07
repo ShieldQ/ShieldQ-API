@@ -21,13 +21,12 @@ The most common use would be:
 - **In a loop:**
     - Retrieve the new document's metadata. If no items are listed, sleep for a while (e.g., around 60 seconds) and try again.
     - Process each individual document:
-        - Retrieve document content - see instructions <a href=http://docs.shieldq.apiary.io/#introduction/receiving-and-downloading-documents>here</a>.
+        - Retrieve document content - see instructions <a href=#introduction/receiving-and-downloading-documents>here</a>.
         - Change the document status so that it will not appear in the next list retrieval. The status can be changed to either "Deleted" or "Archived."  
         Please note: the document can be searched until it is deleted, according to your retention policy).
 - **End the session**
 
 ### Service endpoint
-
 <code>https://api.shieldq.com</code>
 
 ### Authorization
@@ -46,10 +45,11 @@ Example:
 
 Important note: capitalize the "B" in the keyword "Basic," and add a space between Basic and the value.
 
-#### Token authentication
-The Token authentication is returned by a call to <a href=http://docs.shieldq.apiary.io/#reference/0/access-token/get-access-token>"GET Aceess Token"</a>, and is used for authentication in all subsequent requests. 
-The structure of the Authorization HTTP header containing the Token is: Authorization: Bearer <<B>value</B>> <br>
+#### Authentication token 
+The authentication token is returned by a call to <a href=#reference/0/access-token/get-access-token>"GET Aceess Token"</a>, and is used for authentication in all subsequent requests. 
+The structure of the authorization HTTP header containing the Token is: Authorization: Bearer <<B>value</B>> <br>
 <B>Value</B> is the Token returned from the "GET Access Token" request. 
+Important note: capitalize the "B" in the keyword "Bearer," and add a space between Basic and the value.
 
 
 Example:
@@ -84,25 +84,28 @@ A document may have one of the following statuses:
 
 ### System limitations
 
-- The maximum number of inbound messages to return in a query is 100.
-
-        100 is the default, and will be used if there is no other definition, or if the value entered is larger than 100.
-- You can query <a href=http://docs.shieldq.apiary.io/#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> up to 6 times a minute.
 - The access token will expire within 15 minutes of last use.
+- The maximum number of inbound messages to return in a query is 100.
+    - 100 is the default, and will be used if there is no other definition, or if the value entered is larger than 100.
+- You can query <a href=#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> up to 6 times a minute.
+- Upload documents restrictions. See here the method for <a href=#reference/0/uploading-documents-to-shieldq>"Uploading documents to ShieldQ"</a>
+    - The Upload action is restricted to run in Switch environment only.
+    - Number of documents is limited to 5.
+    - Each document size is limited to 10M
+    - Allowed files format: pdf, jpeg, tiff, gif, png, bmp
 
 ### Date-times format
-Date-times are expected to be <a target="_blank" href="https://en.wikipedia.org/wiki/ISO_8601/">ISO 8601-compliant</a>. 
-See the link for details, but generally speaking, a date-time should look like this:
+Date-times are expected to be <a target="_blank" href="https://en.wikipedia.org/wiki/ISO_8601/">ISO 8601-compliant</a> , see link for more details. 
+Date-time should look like this:
 
 (date as YYYY-MM-DD)T(time)(GMT offset), for example: 2001-12-31T21:34+02:00
 
-The date-time comprises:
-
-* A date part, like <code>2001-12-31</code>
-* The letter T as a separator
-* A time part, like <code>21:34</code>
-* A GMT time zone offset, like <code>+02:00</code> or <code>-08:00</code>, specifying the time zone for the time part, above. 
-If there is no time zone offset, or if the offset is <code>00:00</code>, the time part provided will be assumed to be in GMT.
+- The date-time comprises:
+    - A date part, like <code>2001-12-31</code>
+    - The letter T as a separator
+    - A time part, like <code>21:34</code>
+    - A GMT time zone offset, like <code>+02:00</code> or <code>-08:00</code>, specifying the time zone for the time part, above. 
+    If there is no time zone offset, or if the offset is <code>00:00</code>, the time part provided will be assumed to be in GMT.
 
 ### Response Codes
 Common HTTP status codes may be returned, including:
@@ -114,21 +117,24 @@ Common HTTP status codes may be returned, including:
 * <code>429 Too Many Requests</code> - The user has sent too many requests in a given amount of time. Intended for use with rate limiting schemes.
 * <code>500 Internal Error</code> - The server encountered an unexpected condition which prevented it from fulfilling the request.
 
-## Receiving and downloading documents
-You may receive emails, faxes or uploaded documents.
-When creating a <a href=http://docs.shieldq.apiary.io/#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> request, you will get a list of documents, with the information related.
+## Receiving and downloading documents 
+You may use the API to download your documents received in ShieldQ. the receive emails, faxes or uploaded documents.
+
+### Follow this instructions to download documents
+
+When making a query, <a href=#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a>, you will get a list of documents, with the information related.
 
 Note: "BoxedData" within the response refers to specific information per document type: inbound faxes, uploaded documents and incoming email messages.
 
 
 **To obtain the document download URL:**
-- Get a list of the new documents, using a <a href=http://docs.shieldq.apiary.io/#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> request.
-- The response will return the "DownloadUrl" you need. 
-- In order to retrieve the document:
-    - Copy the "DownloadUrl". 
-    - Create a new "GET" request, using the "DownloadUrl" you copied
-    - Use <a href=http://docs.shieldq.apiary.io/#reference/0/access-token/get-access-token>Access Token</a> as the authentication method.
-- The request will automatically download the document.
+1. Get a list of the new documents, using a <a href=#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> request.
+2. The response will return the <strong>"DownloadUrl"</strong> you need. 
+3. In order to retrieve the document:
+    - Copy the <strong>"DownloadUrl"</strong>. 
+    - Create a new <code>"GET"</code> request, using the <strong>"DownloadUrl"</strong> you copied
+    - Use <a href=http://docs.shieldq.apiary.io/#reference/0/access-token/get-access-token>Access Token</a> as the <strong>authentication method</strong>.
+4. The request will automatically download the document.
 
 
 # Group Actions
@@ -201,7 +207,6 @@ The request will generate a token for the user. The token will be used as author
     
             Authorization: Basic [Base64Encoded of {user:password}]
     
-
 + Response 201 (application/json)
         
         "983c97553ad94d7697691cbfdb997d6d"
@@ -302,7 +307,7 @@ Note: "BoxedData" within the response refers to specific information per documen
     + status (enum,required) - A collection of choices:
         + New - restoring a document that has been already archived or deleted. 
         + Archived - the document will be archived according to the user's retention rules.
-        + Deleted - the document will be deleted. 
+      
 
 ### Set Document Status [POST]
 
@@ -310,7 +315,6 @@ The request will update the document status. <br>
 The user can update the status for a document to: 
 * New - restoring a document that has been already archived or deleted.
 * Archived - the document will be stored according to the user's retention policy.
-* Deleted - the document will be deleted. <br> Note that a deleted document is stored for a week from the delete action and can be restored in that time period. 
 
        
 + Request
@@ -333,3 +337,112 @@ The user can update the status for a document to:
 
         
            "errorMessage": “Item status could not be setted”
+           
+## Uploading documents to ShieldQ [/documents?userId={userId}&reference={reference}]
+
++ Parameters
+
+    + userId (string,optional) - The owner of the document set (default is authenticated user)
+    + reference (string,optional) - A reference string for this document (searchable in the queue)
+        
+
+### Upload document set [PUT]
+
+The request will upload a document set to ShieldQ. See <a href=#introduction/programming-concepts/system-limitations>system limitation for uploding files</a>. 
+
+#### Content-Type
+The uploaded files will be added in the body as binary content.
+
+Content-Type should be set as <code>Content-Type:multipart/mixed</code>. 
+
+When uploading multiple documents, the documents are devided by "boundry", a random number added in the header. See format of the body in the example.
+
+Note - content type must match the uploaded document file format. Allowed files format: pdf, jpeg, tiff, gif, png, bmp.
+
+- <code>Content-Type</code> for each document can be: 
+    - application/pdf
+    - image/jpeg
+    - image/tiff
+    - image/gif
+    - image/png
+    - image/bmp
+
++ Request 
+
+    + Headers
+        
+            Authorization: Bearer {Access Token}
+            Content-Type: multipart/mixed; boundary="265001916915724"
+            
+    + Body
+            
+                {
+                "--265001916915724"
+                "Content-Type": "application/pdf"
+                "{Binary content of files}"
+
+                "--265001916915724"
+                "Content-Type": "image/jpeg"
+                "{Binary content of files}"
+
+                "--265001916915724--"
+                }
+
+            
+   
++ Response 201 (Created)
+
+    + Headers
+    
+            Location: URI for document set in ShieldQ
+
++ Response 401 (application/json)
+
+        
+            errorMessage: “Unauthorized”
+        
+
+
++ Response 500 (application/json)
+
+
+        
+           "errorMessage": “Item status could not be setted”
+           
+           
+           
+## Delete Document Set [/documents/{documentId}]
+
++ Parameters
+
+    + documentId (string,required) - The unique reference set for this document set in ShieldQ
+
+### Delete Document Set [DELETE]
+
+The request will delete the document set in ShieldQ and all metadata associated with it. 
+
+       
++ Request
+
+    + Headers
+        
+            Authorization: Bearer {Access Token}
+
++ Response 200 
+
++ Response 401 (application/json)
+
+        
+            errorMessage: “Unauthorized”
+        
+
+
++ Response 500 (application/json)
+
+
+        
+           "errorMessage": “Item status could not be setted”     
+           
+           
+             + Deleted - the document will be deleted. 
+             * Deleted - the document will be deleted. <br> Note that a deleted document is stored for a week from the delete action and can be restored in that time period.
