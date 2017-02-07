@@ -6,12 +6,10 @@ HOST: https://api.shieldq.com
 
 ## Overview
 
-The ShieldQ API enables users to manage incoming documents and to upload documents to ShieldQ . 
-With this API, you can get a list of newly received documents of any type, retrieve, and either archive or delete them. You can also upload
-images and pdf files.
+The ShieldQ API enables users to manage and retrieve incoming documents . 
+With this API, you can get a list of newly received documents of any type, retrieve, and either archive or delete them.
 
 ShieldQ supports the following document types: inbound faxes, uploaded documents and incoming email messages.
-Upload file formats: pdf, jpeg, tiff, gif, png and bmp.
 
 ### Intended audience
 This document was created for developers, so that they can integrate inbound documents into their system.
@@ -90,11 +88,6 @@ A document may have one of the following statuses:
 - The maximum number of inbound messages to return in a query is 100.
     - 100 is the default, and will be used if there is no other definition, or if the value entered is larger than 100.
 - You can query <a href=#reference/0/incoming-documents/get-new-documents-list>"Get New Documents List"</a> up to 6 times a minute.
-- Upload documents restrictions. See here the method for <a href=#reference/0/uploading-documents-to-shieldq>"Uploading documents to ShieldQ"</a>
-    - The Upload action is restricted to run in Switch environment only.
-    - Number of documents is limited to 5.
-    - Each document size is limited to 10M
-    - Allowed files format: pdf, jpeg, tiff, gif, png, bmp
 
 ### Date-times format
 Date-times are expected to be <a target="_blank" href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601-compliant</a> , see link for more details. 
@@ -339,112 +332,3 @@ The user can update the status for a document to:
 
         
            "errorMessage": “Item status could not be setted”
-           
-## Uploading documents to ShieldQ [/documents?userId={userId}&reference={reference}]
-
-+ Parameters
-
-    + userId (string,optional) - The owner of the document set (default is authenticated user)
-    + reference (string,optional) - A reference string for this document (searchable in the queue)
-        
-
-### Upload document set [PUT]
-
-The request will upload a document set to ShieldQ. See <a href=#introduction/programming-concepts/system-limitations>system limitation for uploding files</a>. 
-
-#### Content-Type
-The uploaded files will be added in the body as binary content.
-
-Content-Type should be set as <code>Content-Type:multipart/mixed</code>. 
-
-When uploading multiple documents, the documents are devided by "boundry", a random number added in the header. See format of the body in the example.
-
-Note - content type must match the uploaded document file format. Allowed files format: pdf, jpeg, tiff, gif, png, bmp.
-
-- <code>Content-Type</code> for each document can be: 
-    - application/pdf
-    - image/jpeg
-    - image/tiff
-    - image/gif
-    - image/png
-    - image/bmp
-
-+ Request 
-
-    + Headers
-        
-            Authorization: Bearer {Access Token}
-            Content-Type: multipart/mixed; boundary="265001916915724"
-            
-    + Body
-            
-                {
-                "--265001916915724"
-                "Content-Type": "application/pdf"
-                "{Binary content of files}"
-
-                "--265001916915724"
-                "Content-Type": "image/jpeg"
-                "{Binary content of files}"
-
-                "--265001916915724--"
-                }
-
-            
-   
-+ Response 201 (Created)
-
-    + Headers
-    
-            Location: URI for document set in ShieldQ
-
-+ Response 401 (application/json)
-
-        
-            errorMessage: “Unauthorized”
-        
-
-
-+ Response 500 (application/json)
-
-
-        
-           "errorMessage": “Item status could not be setted”
-           
-           
-           
-## Delete Document Set [/documents/{documentId}]
-
-+ Parameters
-
-    + documentId (string,required) - The unique reference set for this document set in ShieldQ
-
-### Delete Document Set [DELETE]
-
-The request will delete the document set in ShieldQ and all metadata associated with it. 
-
-       
-+ Request
-
-    + Headers
-        
-            Authorization: Bearer {Access Token}
-
-+ Response 200 
-
-+ Response 401 (application/json)
-
-        
-            errorMessage: “Unauthorized”
-        
-
-
-+ Response 500 (application/json)
-
-
-        
-           "errorMessage": “Item status could not be setted”     
-           
-           
-             + Deleted - the document will be deleted. 
-             * Deleted - the document will be deleted. <br> Note that a deleted document is stored for a week from the delete action and can be restored in that time period.
